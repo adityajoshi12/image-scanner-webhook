@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-scanner
+  namespace: webhook
+spec:
+  replicas: 1 # Adjust the number of replicas as needed
+  selector:
+    matchLabels:
+      app: image-scanner
+  template:
+    metadata:
+      labels:
+        app: image-scanner
+    spec:
+      volumes:
+          - name: tls
+            secret:
+                secretName: tls
+      containers:
+      - name: image-scanner
+        imagePullPolicy: IfNotPresent
+        image: adityajoshi12/pod-image-scanner:1.1
+        env:
+            - name: PORT
+              value: "9000"
+            - name: CERTS
+              value: /certs
+            - name: SNYK_TOKEN
+              value: "e28........"
+        ports:
+        - containerPort: 9000
+          name: app
+        volumeMounts:
+            - name: tls
+              mountPath: /certs
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi" # Adjust resources based on your application needs
+          limits:
+            cpu: "1"
+            memory: "1Gi"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: image-scanner
+    namespace: webhook
+spec:
+    type: ClusterIP # You can use ClusterIP or NodePort as well
+    selector:
+        app: image-scanner
+    ports:
+        - protocol: TCP
+          port: 443 # External port
+          targetPort: 9000

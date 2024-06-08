@@ -1,0 +1,19 @@
+piVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+    name: "image.scanner.example"
+webhooks:
+    - name: "image.scanner.example"
+      rules:
+          - apiGroups:   [""]
+            apiVersions: ["v1"]
+            operations:  ["CREATE"]
+            resources:   ["pods"]
+            scope:       "Namespaced"
+      clientConfig:
+#          url: NGROL_URL/mutate-pod-webhook-v1-pod
+           service:
+
+      admissionReviewVersions: ["v1", "v1beta1"]
+      sideEffects: None
+      timeoutSeconds: 30
